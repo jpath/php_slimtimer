@@ -21,7 +21,7 @@ class SlimTimer {
   public $user_id = "";
   public $access_token = "";
   // An array of strings to be used as default tags on task creation.
-  public $extra_tags = array();
+  public $default_tags = array();
 
   function __construct($email, $password, $api_key, $http = NULL) {
     if(!isset($http)) {
@@ -67,7 +67,7 @@ class SlimTimer {
 
   public function createTask($name, $tags=array(), $coworkers=array(), $reporters=array(), $completed_on="") {
 
-    $tags = array_merge($tags, $this->extra_tags);
+    $tags = array_merge($tags, $this->default_tags);
     $post_data = array("name" => "Task", "value" => 
       $this->getTaskXml($name, $tags,$coworkers,$reporters,$completed_on));
     $path = "/users/".$this->user_id."/tasks";
