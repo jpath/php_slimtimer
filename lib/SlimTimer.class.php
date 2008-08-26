@@ -20,6 +20,7 @@ class SlimTimer {
   public $slimTimerUrl = "http://www.slimtimer.com";
   public $user_id = "";
   public $access_token = "";
+  public $extra_tags = array();
 
   function __construct($email, $password, $api_key, $http = NULL) {
     if(!isset($http)) {
