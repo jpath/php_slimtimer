@@ -19,12 +19,11 @@ require_once('../../simpletest/unit_tester.php');
 require_once('../../simpletest/reporter.php');
 require_once('../../simpletest/mock_objects.php');
 
-require_once('../library/slimtimer/SlimTimer.class.php');
+require_once('../lib/SlimTimer.class.php');
 
 require_once "HTTP/Request.php";
 
 Mock::generate('SlimTimer');
-Mock::generate('User');
 Mock::generate('HTTP_Request');
 
 $DEBUG = true;
@@ -40,11 +39,6 @@ class SlimTimerAuthenticationTest extends UnitTestCase {
     $this->http = &new MockHTTP_Request();
     $this->http->setReturnValue('getResponseCode', 200);
     $this->st = &new SlimTimer('bob@bob.com', 'secret',"asdfasdfasdf123456",$this->http);
-    $this->user = &new MockUser();
-    $this->user->expect('getEmail',array());
-    $this->user->expect('getSlimTimerPassword',array());
-    $this->user->setReturnValue('getEmail', 'bob@bob.com');
-    $this->user->setReturnValue('getSlimTimerPassword', 'secret');
   }
 
 
