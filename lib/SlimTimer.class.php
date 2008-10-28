@@ -111,7 +111,8 @@ class SlimTimer {
     return $this->makeRequest();
   }
 
-  public function createTimeEntry($task_id, $start_time, $duration_in_seconds, $end_time = NULL) {
+  public function createTimeEntry($task_id, $start_time, $duration_in_seconds, 
+    $end_time = NULL, $tags = NULL, $comments = NULL, $in_progress = false) {
 
     $path = "/users/".$this->user_id."/time_entries";
     $post_data = array("name" => "TimeEntry", "value" => 
