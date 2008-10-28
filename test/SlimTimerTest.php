@@ -31,11 +31,11 @@ $DEBUG = true;
 
 class SlimTimerAuthenticationTest extends UnitTestCase {
   function setUp() {
-    $this->requestXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><request><user><email>bob@bob.com</email><password>secret</password></user><api-key>c3a61cdd22facd6cce20fed458bad6</api-key></request>\n"; 
-
-    $this->responseXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><response><access-token>1144f35ca89ab6470ced9e192db8fbc9711c1788</access-token><user-id type=\"integer\">36686</user-id></response>";
     $this->email = 'bob@bob.com';
     $this->password = 'secret';
+    $this->requestXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><request><user><email>$this->email</email><password>$this->password</password></user><api-key>c3a61cdd22facd6cce20fed458bad6</api-key></request>\n"; 
+
+    $this->responseXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><response><access-token>1144f35ca89ab6470ced9e192db8fbc9711c1788</access-token><user-id type=\"integer\">36686</user-id></response>";
     $this->http = &new MockHTTP_Request();
     $this->http->setReturnValue('getResponseCode', 200);
     $this->st = &new SlimTimer('bob@bob.com', 'secret',"asdfasdfasdf123456",$this->http);
@@ -352,7 +352,8 @@ class SlimTimerTaskLiveNetworkTest extends UnitTestCase {
 
     $DEBUG = false;
     // Change these values to your real values.
-    $this->st = &new SlimTimer('bob@bob.com', 'secret', $this->http);
+#    $this->st = &new SlimTimer('bob@bob.com', 'secret', $this->http);
+    $this->st = &new SlimTimer('slimtester@gmail.com', 'secretsecret', '10037f2809ef0cac854893a2a51669', $this->http);
     $this->assertTrue($this->st->authenticate());
   }
 
@@ -528,24 +529,24 @@ class SlimTimerTaskLiveNetworkTest extends UnitTestCase {
 //  }
 //
 //}
-function __autoload($class_name) {
-  $directories = array(
-    '../application/models/',
-    '../application/models/users/',
-    '../application/models/users/base/',
-    '../environment/classes/dataaccess/'
-  );
-
-  foreach($directories as $directory) {
-    $try1 = ($directory.$class_name.'.php');
-    $try2 = ($directory.$class_name.'.class'.'.php');
-    if(file_exists($try1)) {
-      require_once($try1);
-    } elseif(file_exists($try2)) {
-      require_once($try2);
-    }      
-  }
-}
+//function __autoload($class_name) {
+//  $directories = array(
+//    '../application/models/',
+//    '../application/models/users/',
+//    '../application/models/users/base/',
+//    '../environment/classes/dataaccess/'
+//  );
+//
+//  foreach($directories as $directory) {
+//    $try1 = ($directory.$class_name.'.php');
+//    $try2 = ($directory.$class_name.'.class'.'.php');
+//    if(file_exists($try1)) {
+//      require_once($try1);
+//    } elseif(file_exists($try2)) {
+//      require_once($try2);
+//    }      
+//  }
+//}
 
 $test = &new GroupTest('All file tests');
 $test->addTestCase(new SlimTimerAuthenticationTest());
