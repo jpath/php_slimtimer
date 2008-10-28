@@ -439,96 +439,110 @@ class SlimTimerTaskLiveNetworkTest extends UnitTestCase {
 }
 
 // TODO:
-//class SlimTimerTimeEntryLiveNetworkTest extends UnitTestCase {
-//
-//  function setUp() {
-//    global $DEBUG;
-//
-//    $DEBUG = false;
-//    $this->st = &new SlimTimer();
-//    $this->assertTrue($this->st->authenticate());
-//  }
-//
-//  // Integration test, uses network.
-//  function testEverything() {
-//
-//    // Create a task
-//    // Create a time_entry
-//    try {
-//      $result = $this->st->createTimeEntry('Example2', array('bogus','time_entry'));
-//      $xml = new SimpleXMLElement($result);
-//    } catch (Exception $e) {
-//      $this->fail($e->getMessage());
-//    }
-//    $created_id =  $xml->id;
-//
-//    // List the time_entrys and get the one we just created.
-//    $time_entrylist = $this->st->listTimeEntrys();
-//    try {
-//      $xml = new SimpleXMLElement($time_entrylist);
-//    } catch (Exception $e) {
-//      $this->fail($e->getMessage());
-//    }
-//
-//    $found = false;
-//    $created_id = (string)$created_id;
-//
-//    foreach($xml->time_entry as $time_entry) {
-//      $time_entry_id = (string)$time_entry->id; 
-//      if($time_entry_id == $created_id) {
-//        $found =  true;
-//      }
-//      if($found)
-//        break;
-//    }
-//
-//    $this->assertTrue($found, "Created time_entry not in list.");
-//
-//    // Update time_entry we just created.
-//    try {
-//      $result = $this->st->updateTimeEntry('Example', $created_id, array('newtag'));
-//      new SimpleXMLElement($result);
-//    } catch (Exception $e) {
-//      $this->fail($e->getMessage());
-//    }
-//
-//    // Retrieve time_entry and check that tag is added.
-//    try {
-//      $result = $this->st->showTimeEntry($created_id);
-//      $xml = new SimpleXMLElement($result);
-//    } catch (Exception $e) {
-//      $this->fail($e->getMessage());
-//    }
-//    // TODO: check that tag is added. We get the time_entry back but adding a tag doesn't work.
-//
-//    // Delete the time_entry.
-//    try {
-//      $result = $this->st->deleteTimeEntry($created_id);
-//    } catch (Exception $e) {
-//      $this->fail($e->getMessage());
-//    }
-//    // Make sure time_entry is not in list.
-//    $time_entrylist = $this->st->listTimeEntrys();
-//    try {
-//      $xml = new SimpleXMLElement($time_entrylist);
-//    } catch (Exception $e) {
-//      $this->fail($e->getMessage());
-//    }
-//
-//    $found = false;
-//
-//    foreach($xml->time_entry as $time_entry) {
-//      $time_entry_id = (string)$time_entry->id; 
-//      if($time_entry_id == $created_id) {
-//        $found =  true;
-//      }
-//      if($found)
-//        break;
-//    }
-//    $this->assertFalse($found);
-//  }
-//
-//}
+class SlimTimerTimeEntryLiveNetworkTest extends UnitTestCase {
+
+  function setUp() {
+    global $DEBUG;
+
+    $DEBUG = false;
+    $this->st = &new SlimTimer();
+    $this->assertTrue($this->st->authenticate());
+  }
+
+  // Integration test, uses network.
+  function testEverything() {
+
+    // Create a task and time_entry.
+    try {
+      $result = $this->st->createTask('Example2', array('bogus','task'));
+      $xml = new SimpleXMLElement($result);
+      $task_id =  $xml->id;
+      $start_time = date("yyyy-mm-dd hh:mm:ss");
+      $result = $this->st->createTimeEntry($task_id, $start_time, 3600));
+      $xml = new SimpleXMLElement($result);
+    } catch (Exception $e) {
+      $this->fail($e->getMessage());
+    }
+    $created_id =  $xml->id;
+
+    // List the time_entrys and get the one we just created.
+    $time_entrylist = $this->st->listTimeEntrys();
+    try {
+      $xml = new SimpleXMLElement($time_entrylist);
+    } catch (Exception $e) {
+      $this->fail($e->getMessage());
+    }
+
+    $found = false;
+    $created_id = (string)$created_id;
+
+    foreach($xml->time_entry as $time_entry) {
+      $time_entry_id = (string)$time_entry->id; 
+      if($time_entry_id == $created_id) {
+        $found =  true;
+      }
+      if($found)
+        break;
+    }
+
+    $this->assertTrue($found, "Created time_entry not in list.");
+
+    // Update time_entry we just created.
+    try {
+      $result = $this->st->updateTimeEntry('Example', $created_id, array('newtag'));
+      new SimpleXMLElement($result);
+    } catch (Exception $e) {
+      $this->fail($e->getMessage());
+    }
+
+    // Retrieve time_entry and check that tag is added.
+    try {
+      $result = $this->st->showTimeEntry($created_id);
+      $xml = new SimpleXMLElement($result);
+    } catch (Exception $e) {
+      $this->fail($e->getMessage());
+    }
+    // TODO: check that tag is added. We get the time_entry back but adding a tag doesn't work.
+
+    // Delete the time_entry.
+    try {
+      $result = $this->st->deleteTimeEntry($created_id);
+    } catch (Exception $e) {
+      $this->fail($e->getMessage());
+    }
+    // Make sure time_entry is not in list.
+    $time_entrylist = $this->st->listTimeEntrys();
+    try {
+      $xml = new SimpleXMLElement($time_entrylist);
+    } catch (Exception $e) {
+      $this->fail($e->getMessage());
+    }
+
+    $found = false;
+
+    foreach($xml->time_entry as $time_entry) {
+      $time_entry_id = (string)$time_entry->id; 
+      if($time_entry_id == $created_id) {
+        $found =  true;
+      }
+      if($found)
+        break;
+    }
+    $this->assertFalse($found);
+  }
+
+}
+
+$test = &new GroupTest('All file tests');
+$test->addTestCase(new SlimTimerAuthenticationTest());
+$test->addTestCase(new SlimTimerTaskTest());
+$test->addTestCase(new SlimTimerTimeEntryTest());
+// Always run last, and run sparingly so we don't piss off the SlimTimer guy.
+// $test->addTestCase(new SlimTimerTaskLiveNetworkTest());
+// $test->addTestCase(new SlimTimerTimeEntryLiveNetworkTest());
+$test->run(new HtmlReporter());
+
+
 //function __autoload($class_name) {
 //  $directories = array(
 //    '../application/models/',
@@ -547,12 +561,4 @@ class SlimTimerTaskLiveNetworkTest extends UnitTestCase {
 //    }      
 //  }
 //}
-
-$test = &new GroupTest('All file tests');
-$test->addTestCase(new SlimTimerAuthenticationTest());
-$test->addTestCase(new SlimTimerTaskTest());
-$test->addTestCase(new SlimTimerTimeEntryTest());
-// Always run last
-//$test->addTestCase(new SlimTimerTaskLiveNetworkTest());
-$test->run(new HtmlReporter());
 ?>
