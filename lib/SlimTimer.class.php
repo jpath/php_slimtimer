@@ -17,15 +17,16 @@
  */
 class SlimTimer {
 
-  public $slimTimerUrl = "http://www.slimtimer.com";
+  public $slimTimerUrl = "http://slimtimer.com";
   public $user_id = "";
   public $access_token = "";
   // An array of strings to be used as default tags on task creation.
-  public $default_tags = array();
+  public $extra_tags = array("LiFT");
 
   function __construct($email, $password, $api_key, $http = NULL) {
+    $http_params = array('allowRedirects' => true);
     if(!isset($http)) {
-      $this->http = &new HTTP_Request($this->slimTimerUrl);
+      $this->http = &new HTTP_Request($this->slimTimerUrl, $http_params);
     }
     else $this->http = $http;
     $this->apiUserEmail = $email;
@@ -67,7 +68,7 @@ class SlimTimer {
 
   public function createTask($name, $tags=array(), $coworkers=array(), $reporters=array(), $completed_on="") {
 
-    $tags = array_merge($tags, $this->default_tags);
+    $tags = array_merge($tags, $this->extra_tags);
     $post_data = array("name" => "Task", "value" => 
       $this->getTaskXml($name, $tags,$coworkers,$reporters,$completed_on));
     $path = "/users/".$this->user_id."/tasks";
@@ -78,12 +79,28 @@ class SlimTimer {
 
   public function updateTask($name, $task_id,$tags=array(), $coworkers=array(), $reporters=array(), $completed_on="") {
 
-    $post_data = array("name" => "Task", "value" => 
-      $this->getTaskXml($name, $tags,$coworkers,$reporters,$completed_on));
+    $task_xml = $this->getTaskXml($name, $tags,$coworkers,$reporters,$completed_on);
+    $post_data = array("name" => "Task", "value" => $task_xml);
     $path = "/users/".$this->user_id."/tasks/$task_id";
-    $this->setupHttp(HTTP_REQUEST_METHOD_PUT, $path, $post_data );
+    $this->setupHttp(HTTP_REQUEST_METHOD_PUT, $path, $post_data);
     return $this->makeRequest();
 
+  }
+
+  public function completeTask($task_name) {
+    // Get a list of all tasks to search by name.
+    $all_tasks_xml = $this->listTasks();
+    $xml = simplexml_load_string($all_tasks_xml);
+    $result = $xml->xpath("/tasks/task[name='$task_name']");
+    if(count($result) > 0) {
+      $task_id = $result[0]->id;
+    }
+
+    // Use the resulting task_id to update the task and mark complete.
+    if(!empty($task_id)) {
+      return $this->updateTask($task_name, $task_id, array(), array(), array(), 
+      strftime("%Y-%m-%d %H:%M:%S"));
+    }
   }
 
   public function showTask($task_id) {
@@ -111,8 +128,7 @@ class SlimTimer {
     return $this->makeRequest();
   }
 
-  public function createTimeEntry($task_id, $start_time, $duration_in_seconds, 
-    $end_time = NULL, $tags = NULL, $comments = NULL, $in_progress = false) {
+  public function createTimeEntry($task_id, $start_time, $duration_in_seconds, $end_time = NULL) {
 
     $path = "/users/".$this->user_id."/time_entries";
     $post_data = array("name" => "TimeEntry", "value" => 
@@ -144,16 +160,17 @@ class SlimTimer {
   }
 
   private function makeRequest() {
-    if (!PEAR::isError($this->http->sendRequest())) {
+
+    if (!PEAR::isError($result = $this->http->sendRequest())) {
       $response_code = $this->http->getResponseCode(); 
       if( $response_code == 200 ) 
         return $this->http->getResponseBody();
       else {
         return "ERROR: Request failed with response code " . $response_code . 
-          ":  " . $this->http->getResponseBody() . "\nRequest was: \n". $this->http->_postData['AuthData'];
+          ":  " . $this->http->getResponseBody() . "\nRequest was: \n". $this->http->_postData["Task"];
       }
     } else {
-      return "ERROR: pear";
+      return "PEAR ERROR: $result->message";
     }
   }
 
@@ -176,16 +193,15 @@ class SlimTimer {
 
     $this->http->setMethod($method);
 
-    foreach($this->headers as $k => $v) {
-      $this->http->addHeader($k, $v);
-    }
-
     if(!empty($headers)) {
       foreach($headers as $k => $v) {
         $this->http->addHeader($k, $v);
       }
     }
 
+    foreach($this->headers as $k => $v) {
+      $this->http->addHeader($k, $v);
+    }
 
     if(!empty($post_data)) {
       $this->http->addPostData($post_data['name'], $post_data['value'], true);
