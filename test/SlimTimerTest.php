@@ -458,7 +458,7 @@ class SlimTimerTimeEntryLiveNetworkTest extends UnitTestCase {
       $xml = new SimpleXMLElement($result);
       $task_id =  $xml->id;
       $start_time = date("yyyy-mm-dd hh:mm:ss");
-      $result = $this->st->createTimeEntry($task_id, $start_time, 3600));
+      $result = $this->st->createTimeEntry($task_id, $start_time, 3600);
       $xml = new SimpleXMLElement($result);
     } catch (Exception $e) {
       $this->fail($e->getMessage());
